@@ -1,18 +1,97 @@
 import os
 import sys
+import json
 
-filename = sys.argv[1]
+"""
+Segregation Script — Parses DNS Dumpster JSON output into categorized files.
+
+Usage: python3 seg.py <domain>
+  Reads from dump/output_<domain>.txt and writes categorized data to enum/
+"""
+
+if len(sys.argv) < 2:
+    print("Usage: python3 seg.py <domain>")
+    sys.exit(1)
+
+domain = sys.argv[1]
+input_file = f"dump/output_{domain}.txt"
+
+if not os.path.exists(input_file):
+    print(f"[-] Input file not found: {input_file}")
+    sys.exit(1)
 
 if not os.path.exists('enum'):
     os.makedirs('enum')
 
-with open(filename, 'r') as file:
-    lines = file.readlines()
+# Parse the JSON output from DnsDumpster
+try:
+    with open(input_file, 'r') as file:
+        data = json.loads(file.read())
+except json.JSONDecodeError:
+    # Fallback: try line-based parsing for non-JSON output
+    with open(input_file, 'r') as file:
+        lines = file.readlines()
 
-subdomains = [line.strip() for line in lines if 'subdomain' in line]
-ips = [line.strip() for line in lines if 'subdomain_ip' in line]
-ns_records = [line.strip() for line in lines if 'ns' in line]
+    subdomains = [line.strip() for line in lines if 'subdomain' in line.lower()]
+    ips = [line.strip() for line in lines if 'ip' in line.lower()]
+    ns_records = [line.strip() for line in lines if 'ns' in line.lower()]
 
+    with open('enum/subdomains.txt', 'w') as file:
+        for subdomain in subdomains:
+            file.write(subdomain + '\n')
+
+    with open('enum/ips.txt', 'w') as file:
+        for ip in ips:
+            file.write(ip + '\n')
+
+    with open('enum/ns_records.txt', 'w') as file:
+        for ns in ns_records:
+            file.write(ns + '\n')
+
+    print(f"[+] Segregated output written to enum/ (line-based parsing)")
+    sys.exit(0)
+
+# JSON-based parsing (DnsDumpster outputs structured JSON)
+subdomains = []
+ips = []
+ns_records = []
+mx_records = []
+dns_records = []
+txt_records = []
+
+for entry in data:
+    entry_type = entry.get('type', '')
+
+    if entry_type == 'Host':
+        for record in entry.get('records', []):
+            server_name = record.get('server_name', '')
+            ip_address = record.get('ip_address', '')
+            if server_name:
+                subdomains.append(server_name)
+            if ip_address:
+                ips.append(ip_address)
+
+    elif entry_type == 'DNS':
+        for record in entry.get('records', []):
+            server_name = record.get('server_name', '')
+            ip_address = record.get('ip_address', '')
+            if server_name:
+                ns_records.append(f"{server_name} ({ip_address})")
+                dns_records.append(record)
+
+    elif entry_type == 'MX':
+        for record in entry.get('records', []):
+            server_name = record.get('server_name', '')
+            if server_name:
+                mx_records.append(server_name)
+
+    elif entry_type == 'TXT':
+        for record in entry.get('records', []):
+            txt = record.get('record', '')
+            if txt:
+                txt_records.append(txt)
+
+# Write segregated output files
 with open('enum/subdomains.txt', 'w') as file:
     for subdomain in subdomains:
         file.write(subdomain + '\n')
@@ -25,14 +104,28 @@ with open('enum/ns_records.txt', 'w') as file:
     for ns in ns_records:
         file.write(ns + '\n')
 
+if mx_records:
+    with open('enum/mx_records.txt', 'w') as file:
+        for mx in mx_records:
+            file.write(mx + '\n')
+
+if txt_records:
+    with open('enum/txt_records.txt', 'w') as file:
+        for txt in txt_records:
+            file.write(txt + '\n')
+
 with open('enum/description.txt', 'w') as file:
-    file.write("Host: This is the main domain that was scanned, in this case, nmap.org.\n")
-    file.write("MX: This field would contain a list of Mail Exchange (MX) records associated with the domain. In this case, it’s empty, indicating that no MX records were found.\n")
-    file.write("NS: This is a list of Name Server (NS) records associated with the domain. Each record includes the IP address of the name server and the name of the name server itself. For example, ns2.linode.com. with IP 162.159.24.39.\n")
-    file.write("Server: This is the type of web server software running on the main domain. In this case, it’s Apache/2.4.6 (CentOS).\n")
-    file.write("Subdomains: This is a list of subdomains associated with the main domain. Each subdomain includes:\n")
-    file.write("ASN: Autonomous System Number (ASN) details for the IP address of the subdomain. This includes the ASN itself, the CIDR block, the country code, the date the ASN was assigned, a description of the ASN, and the registry that assigned the ASN.\n")
-    file.write("Server: The type of web server software running on the subdomain.\n")
-    file.write("Subdomain: The name of the subdomain itself.\n")
-    file.write("Subdomain IP: The IP address associated with the subdomain.\n")
-    file.write("The error messages at the beginning indicate that there was an issue retrieving data from VirusTotal, likely due to access restrictions (status code 403 indicates forbidden access).\n")
+    file.write("Host: This is the main domain that was scanned.\n")
+    file.write("MX: Mail Exchange (MX) records associated with the domain.\n")
+    file.write("NS: Name Server (NS) records associated with the domain. Each record includes the IP address and name of the name server.\n")
+    file.write("DNS: DNS server records for the domain.\n")
+    file.write("TXT: TXT records associated with the domain (SPF, DKIM, etc.).\n")
+    file.write("Subdomains: List of subdomains discovered via DNS enumeration.\n")
+    file.write("IPs: IP addresses associated with discovered subdomains.\n")
+
+print(f"[+] Segregated output written to enum/")
+print(f"    Subdomains: {len(subdomains)}")
+print(f"    IPs: {len(ips)}")
+print(f"    NS Records: {len(ns_records)}")
+print(f"    MX Records: {len(mx_records)}")
+print(f"    TXT Records: {len(txt_records)}")

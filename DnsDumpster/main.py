@@ -2,6 +2,12 @@ import asyncio
 import aiohttp
 import argparse
 import json
+import sys
+import os
+
+# Ensure imports work when called from project root (e.g. python3 DnsDumpster/main.py)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from DnsDumpsterClient import *
 
 async def main(url):

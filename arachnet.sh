@@ -184,20 +184,20 @@ test_idor() {
         1)
             echo -e "${purple}Enter the filename that contains subdomains:${nc}"
             read filename
-            python3 idor/iodor.py -f $filename -o output.txt
+            python3 idor/idor.py -f $filename -o output.txt
             ;;
         2)
             echo -e "${purple}Enter the URL to scan:${nc}"
             read url
-            python3 idor/iodor.py -u $url -o output.txt
+            python3 idor/idor.py -u $url -o output.txt
             ;;
         3)
-            python3 idor/iodor.py -f original_domain.txt -o output.txt
+            python3 idor/idor.py -f original_domain.txt -o output.txt
             ;;
         4)
             echo -e "${purple}Select a domain:${nc}"
             select domain in $(cat dump/subdomains.txt); do
-                python3 idor/iodor.py -f $domain -o output.txt
+                python3 idor/idor.py -f $domain -o output.txt
                 break
             done
             ;;
@@ -266,25 +266,26 @@ scope() {
 
 menu() {
     clear
-    echo "${red}    _                      _                 _   ${nc}"
-    echo "${red}   / \    _ __  __ _   ___| |__  _ __   ___ | |_ ${nc}"
-    echo "${red}  / _ \  | '__/ _\` | / __| '_ \| '_ \ / _ \  __|${nc}"
-    echo "${red} / ___ \ | |  | (_| |  (__| | | | | | |  __/  |_ ${nc}"
-    echo "${red}/_/   \_ \_|   \__,_| \___|_| |_|_| |_|\___| \__|${nc}"
-    echo "${red}   ${nc}"
-    echo "${red}   ${nc}"
+    echo -e "${red}    _                      _                 _   ${nc}"
+    echo -e "${red}   / \\    _ __  __ _   ___| |__  _ __   ___ | |_ ${nc}"
+    echo -e "${red}  / _ \\  | '__/ _\` | / __| '_ \\| '_ \\ / _ \\  __|${nc}"
+    echo -e "${red} / ___ \\ | |  | (_| |  (__| | | | | | |  __/  |_ ${nc}"
+    echo -e "${red}/_/   \\_ \\_|   \\__,_| \\___|_| |_|_| |_|\\___| \\__|${nc}"
+    echo -e "${red}   ${nc}"
+    echo -e "${purple}        Arachnet - Cybersecurity Toolkit${nc}"
+    echo -e "${purple}          Project Wing Cyber | MLSA KIIT${nc}"
+    echo -e "${red}   ${nc}"
     read -p "Enter the domain: " domain
-    echo "${red}   ${nc}"
-    echo "${red}   ${nc}"
+    echo -e "${red}   ${nc}"
 
-        echo "${purple}1. Enumerate${nc}"
-        echo "${purple}2. Vuln Scan${nc}"
-        echo "${purple}3. Test for Sqli${nc}"
-        echo "${purple}4. Test for Xss${nc}"
-        echo "${purple}5. Test for IDOR${nc}"
-        echo "${purple}6. Scope options ${nc}"
-        echo "${purple}7. Exit${nc}"
-        echo "${red}   ${nc}"
+        echo -e "${purple}1. Enumerate${nc}"
+        echo -e "${purple}2. Vuln Scan${nc}"
+        echo -e "${purple}3. Test for SQLi${nc}"
+        echo -e "${purple}4. Test for XSS${nc}"
+        echo -e "${purple}5. Test for IDOR${nc}"
+        echo -e "${purple}6. Scope options ${nc}"
+        echo -e "${purple}7. Exit${nc}"
+        echo -e "${red}   ${nc}"
         echo  "Please enter an option: "
         read option
         case $option in
