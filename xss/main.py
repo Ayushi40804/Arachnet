@@ -16,8 +16,12 @@ from Waf import Waf_Detect
 from optparse import OptionParser
 import subprocess
 import sys
+<<<<<<< HEAD
 import os
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+=======
+from urllib.parse import urlparse , parse_qs
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -39,6 +43,7 @@ This script parses command-line arguments for a vulnerability scanning applicati
 """
 
 parser = OptionParser()
+<<<<<<< HEAD
 parser.add_option("-f", "--filename", dest="filename", help="File containing URLs to scan")
 parser.add_option("-u", "--url", dest="url", help="Single URL to scan (e.g. http://example.com/?id=2)")
 parser.add_option("-o", "--output", dest="output", help="Output filename to store results")
@@ -51,6 +56,18 @@ parser.add_option("--crawl", dest="crawl", action="store_true", default=False,
                   help="Enable crawling to discover URLs")
 parser.add_option("--pipe", dest="pipe", action="store_true", default=False,
                   help="Read URLs from stdin (pipe)")
+=======
+
+parser.add_option('-f', dest='filename', help="specify Filename to scan. Eg: urls.txt etc")
+parser.add_option("-u", dest="url", help="scan a single URL. Eg: http://example.com/?id=2")
+parser.add_option('-o', dest='output', help="filename to store output. Eg: result.txt")
+parser.add_option('-t', dest='threads', help="no of threads to send concurrent requests(Max: 10)")
+parser.add_option('-H', dest='headers', help="specify Custom Headers")
+parser.add_option('--waf', dest='waf',action='store_true', help="detect web application firewall and then test payloads")
+parser.add_option('-w', dest='custom_waf',help='use specific payloads related to W.A.F')
+parser.add_option('--crawl',dest='crawl',help='crawl then find xss',action="store_true")
+parser.add_option('--pipe',dest="pipe",action="store_true",help="pipe output of a process as an input")
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 
 val, args = parser.parse_args()
 filename = val.filename
@@ -120,6 +137,11 @@ class Main:
     def replace(self, url, param_name, value):
         return re.sub(f"{re.escape(param_name)}=([^&]+)", f"{param_name}={value}", url)
 
+<<<<<<< HEAD
+=======
+    def replace(self,url,param_name,value):
+        return re.sub(f"{param_name}=([^&]+)",f"{param_name}={value}",url)
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
     def bubble_sort(self, arr):
         """
         Sorts the given array of payloads in ascending order based on their
@@ -174,8 +196,17 @@ class Main:
             print(Fore.RED + f"[-] An error occurred during crawling: {e}")
 
     def parameters(self, url):
+<<<<<<< HEAD
         """
         Extracts parameter names from the given URL's query string.
+=======
+      url_parsed = urlparse(url)
+      parameter_value = parse_qs(url_parsed.query)
+      parameter = list(parameter_value)
+      return parameter
+      """
+    Extracts parameter names from the given URL's query string.
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 
         Args:
             url (str): The URL to extract parameters from.
@@ -188,9 +219,23 @@ class Main:
         return list(params.keys())
 
     def parser(self, url, param_name, value):
+<<<<<<< HEAD
         """
         Replaces a parameter's value in the URL and returns a dictionary
         of the modified URL components.
+=======
+      parameter_dict = {}
+      url_parsed = urlparse(url)
+      parameter_query = url_parsed.query
+      seperate_parameter = parameter_query.split("&")
+      for parameter in seperate_parameter:
+        parameter = parameter.split("=")
+        parameter_dict[parameter[0]] = parameter[1]
+      parameter_dict[param_name] = value
+      return parameter_dict
+      """
+    Replaces a parameter's value in the URL and returns a dictionary of modified parameters.
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 
         Args:
             url (str): The URL to modify.
@@ -229,11 +274,17 @@ class Main:
             "full_url": new_url
         }
 
+<<<<<<< HEAD
     def validator(self, arr, param_name, url):
         """
         Analyzes a list of potential parameter values (dangerous characters)
         for reflection vulnerabilities by injecting them and checking if they
         appear in the response.
+=======
+    def validator(self, arr, param_name, url):      
+      """
+    Analyzes a list of potential parameter values for potential reflection vulnerabilities.
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 
         Args:
             arr (list): A list of dangerous characters to test.

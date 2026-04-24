@@ -7,8 +7,24 @@ if sys.platform == 'win32':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 from urllib.parse import urljoin
+<<<<<<< HEAD
 from bs4 import BeautifulSoup
+=======
+import subprocess 
+from optparse import OptionParser
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 from colorama import Fore, Back, Style
+
+parser = OptionParser() 
+
+parser.add_option("-u", dest="url", help="scan a single URL. Eg: http://example.com/?id=2")
+parser.add_option('-f', dest='filename', help="specify Filename to scan. Eg: urls.txt etc")
+parser.add_option('-o', dest='output', help="filename to store output. Eg: result.txt")
+
+val,args = parser.parse_args()
+url=val.url
+filename=val.filename
+output=val.output
 
 red = Fore.RED + Style.BRIGHT
 green = Fore.GREEN + Style.BRIGHT
@@ -83,9 +99,25 @@ class IDORScanner:
             "/api/exam_results"
         ]
 
+<<<<<<< HEAD
     def crawl(self, url, base_url, depth=1):
         """
         Recursively crawl from a given URL, collecting discovered links.
+=======
+def read(filename):
+     urls = []
+     try:
+         result = subprocess.run(['cat', filename], capture_output=True)
+         urls = result.stdout
+     except subprocess.CalledProcessError as e:
+         print(f"Error: {e}")
+     return urls
+
+def crawl(url, base_url):
+    visited_urls.add(url)
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.content, "html.parser")
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 
         Args:
             url (str): The URL to crawl.
@@ -240,6 +272,7 @@ class IDORScanner:
                      f"{len(self.results)} potential vulnerabilities found.")
 
 
+<<<<<<< HEAD
 def main():
     """CLI entry point for IDOR scanner."""
     parser = argparse.ArgumentParser(
@@ -251,6 +284,13 @@ def main():
     parser.add_argument('-o', '--output', type=str,
                         help='Output file to write results to')
     args = parser.parse_args()
+=======
+def main(url):
+    base_url = f"{url}"
+    start_url = base_url + "/"
+    # Start crawling and spidering from the initial URL
+    crawl(start_url, base_url)
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
 
     scanner = IDORScanner(output_file=args.output)
 
@@ -277,8 +317,21 @@ def main():
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     try:
         os.system("cls" if os.name == "nt" else "clear")
         main()
     except KeyboardInterrupt:
         print(f"\n{yellow}[{white}!{yellow}] {red}You Pressed Ctrl + C. Goodbye!")
+=======
+  try:
+     os.system("clear")
+     if url and not filename:
+         main(url)
+     else:
+         urls=read(filename)
+         for url in urls:
+             main(url)
+  except KeyboardInterrupt:
+    print(error + "You Pressed Ctrl + C Goodbye!")
+>>>>>>> b708ea6687ccf277ffdcc35d1b3829e01d8a571d
